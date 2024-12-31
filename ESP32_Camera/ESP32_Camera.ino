@@ -8,9 +8,9 @@
 #define RXD2 14  // UOR pin
 #define TXD2 12  // UOT pin
 
-const char* ssid = "WIFI NAME";
-const char* password = "WIFI PASSWORD";
-const char* serverUrl = "http://192.168.1.105:3000";
+const char* ssid = "WIFI NAME";       // Replace with your Wi-Fi SSID
+const char* password = "WIFI PASSWORD";              // Replace with your Wi-Fi Password
+const char* serverUrl = "http://192.168.1.105:3000"; // Replace with your server URL
 
 void startCameraServer();
 void setupLedFlash(int pin);
@@ -104,7 +104,7 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("WiFi connected");
+  Serial.println("\nWiFi connected");
 
   startCameraServer();
 
@@ -117,18 +117,24 @@ void loop() {
   if (Serial2.available()) {
     String uid = Serial2.readStringUntil('\n');
     uid.trim();
-    
+
     if (WiFi.status() == WL_CONNECTED) {
       HTTPClient http;
-      String url = String(serverUrl) + "?uid=" + uid;
-      
-      http.begin(url);
-      int httpCode = http.GET();
-      
+      http.begin(serverUrl);
+
+      // Prepare JSON payload
+      http.addHeader("Content-Type", "application/json");
+      String jsonPayload = "{\"uid\":\"" + uid + "\"}";
+
+      // Send POST request
+      int httpCode = http.POST(jsonPayload);
+
       if (httpCode > 0) {
         Serial.printf("HTTP Response code: %d\n", httpCode);
         String payload = http.getString();
         Serial.println(payload);
+      } else {
+        Serial.printf("Error sending POST request: %s\n", http.errorToString(httpCode).c_str());
       }
       http.end();
     }

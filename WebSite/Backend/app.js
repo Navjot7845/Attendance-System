@@ -26,22 +26,28 @@ app.post('/', (req, res) => {
     console.log(`Received UID: ${uid}`);
     console.log(`Yoi, someone just pinged at ${new Date()}`);
 
+    // ! Code to run the python face recognition program
     const pythonProcess = spawn("python3", [`${__dirname}/face-recognition/main.py`]);
 
+    // * This runs when we start the verification of the user
     pythonProcess.stdout.on('data', (data) => {
-        const name = data.toString().trim(); // Ensure the output is a clean string
+        const name = data.toString().trim(); 
         if (uid === "219c7726" && name === "Manik") {
             console.log("Verified");
         } else {
+            // TODO 1 Check if no face
+            // TODO 2 Check if not verified
+            // TODO 3 Try to catch all the errors
             console.log("Fake");
         }
 
-        console.log(`stdout: ${name}`);
+        console.log(`Name of the person : ${name}`);
     });
 
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
+    // ? This below is to check for errors
+    // pythonProcess.stderr.on('data', (data) => {
+    //     console.error(`stderr: ${data}`);
+    // });
 
     res.json({ message: "Yoi, someone just pinged", uid });
 });

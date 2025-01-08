@@ -1,1 +1,1 @@
-cap = cv2.VideoCapture("http://192.168.1.104:81/stream")
+break

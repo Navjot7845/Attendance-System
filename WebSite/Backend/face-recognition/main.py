@@ -28,5 +28,8 @@ while True:
     if key == 27:
         break
 
+    if len(face_names) > 0:
+        break
+
 cap.release()
 cv2.destroyAllWindows()

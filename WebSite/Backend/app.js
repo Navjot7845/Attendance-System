@@ -10,7 +10,7 @@ const ipAddress = ip.address();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/", (req, res) => {
+app.post("/", async (req, res) => {
   const { uid } = req.body; // * Extract uid from the JSON payload
   
   if (!uid) {
@@ -20,10 +20,11 @@ app.post("/", (req, res) => {
 
   console.log(`Received UID: ${uid} at ${new Date()}`);
 
-  // ! Code to run the python face recognition program
+  // * Code to run the python face recognition program
+  // TODO : Based on result sent the email to the user and update the attendance
   faceRecognition(uid);
 
-  res.json({ message: "Yoi, someone just pinged", uid });
+  res.json({ message: `Status will be sent to the user through registered Email`});
 });
 
 app.listen(port, () => {

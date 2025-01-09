@@ -15,7 +15,8 @@ export default function faceRecognition(uid) {
   pythonProcess.stdout.on("data", (data) => {
     const name = data.toString().trim();
     if (uid === "219c7726" && name === "Manik") {
-      console.log("Verified");
+      console.log(`~[SERVER] : ${name} with uid ${uid} just got 'verified'\n`);
+
     } else {
       // TODO 1 Check if no face
       // TODO 2 Check if not verified
@@ -23,7 +24,6 @@ export default function faceRecognition(uid) {
       console.log("Fake");
     }
 
-    console.log(`Name of the person : ${name}`);
   });
 
   // ? This below is to check for errors

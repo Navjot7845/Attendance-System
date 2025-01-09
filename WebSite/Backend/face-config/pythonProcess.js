@@ -12,10 +12,11 @@ export default function faceRecognition(uid, VerifiedName) {
 
   let timeoutHandle;
 
+  // TODO 1 Check if no face visible
   // ! Set a timeout to kill the process after 7 seconds
   const timeout = 7000; 
   timeoutHandle = setTimeout(() => {
-    console.log("~[SERVER]: Process timed out after 7 seconds.");
+    console.log(`~[SERVER]: Process timed out after 7 seconds for user '${VerifiedName}' uid '${uid}'`);
     pythonProcess.kill("SIGTERM"); // * Terminate the process
   }, timeout);
 
@@ -25,13 +26,13 @@ export default function faceRecognition(uid, VerifiedName) {
     clearTimeout(timeoutHandle); 
 
     const name = data.toString().trim();
+
+    // TODO 2 Check if verified
     if (name === VerifiedName) {
       console.log(`~[SERVER]: ${name} with uid '${uid}' just got 'verified'\n`);
     } else {
-      // TODO 1 Check if no face
-      // TODO 2 Check if not verified
-      // TODO 3 Try to catch all the errors
-      console.log("Fake", name, VerifiedName);
+      // TODO 3 Check if not verified
+      console.log(`![SERVER] : Proxy done by '${name}' for '${VerifiedName}' with uid '${uid}'`);
     }
   });
 

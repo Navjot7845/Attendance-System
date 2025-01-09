@@ -1,11 +1,13 @@
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { spawn } from "child_process";
+import { db } from "../config/database.js";
+import mailSender from "../config/email.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export default function faceRecognition(uid, VerifiedName) {
+export default function faceRecognition(uid, VerifiedName, email) {
   const pythonProcess = spawn("python3", [
     `${__dirname}/face-recognition/main.py`,
   ]);
@@ -21,7 +23,7 @@ export default function faceRecognition(uid, VerifiedName) {
   }, timeout);
 
   // * This runs when we start the verification of the user
-  pythonProcess.stdout.on("data", (data) => {
+  pythonProcess.stdout.on("data", async (data) => {
     // * Clear the timeout if data is received in time
     clearTimeout(timeoutHandle); 
 
@@ -29,9 +31,20 @@ export default function faceRecognition(uid, VerifiedName) {
 
     // TODO 2 Check if verified
     if (name === VerifiedName) {
-      console.log(`~[SERVER]: ${name} with uid '${uid}' just got 'verified'\n`);
+      const time = new Date();
+
+      try {
+        await db.query(`CALL add_attendance($1)`, [uid]);
+        
+        mailSender(email, "You got verified", `Attendance updated succesfully at ${time}`);
+        console.log(`~[SERVER]: ${name} with uid '${uid}' just got 'verified' at ${time}\n`);
+      } catch (error) {
+        console.error(`~[SERVER]: Error logging attendance: ${error.message}`);
+      }
+
     } else {
       // TODO 3 Check if not verified
+      mailSender(email, "Proxy detected", `Proxy at ${time} by ${name} for ${VerifiedName}`);
       console.log(`![SERVER] : Proxy done by '${name}' for '${VerifiedName}' with uid '${uid}'`);
     }
   });

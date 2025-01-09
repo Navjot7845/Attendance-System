@@ -2,6 +2,7 @@ import express from "express";
 import ip from "ip";
 import faceRecognition from "./face-config/pythonProcess.js";
 import { connectDB, db } from "./config/database.js";
+import mailSender from "./config/email.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -40,7 +41,7 @@ app.post("/", async (req, res) => {
   console.log(`Received UID: ${uid} at ${new Date()}`);
 
   // * 2. Verify using python face recognition
-  faceRecognition(uid, result.rows[0].name);
+  faceRecognition(uid, result.rows[0].name, result.rows[0].email);
 
   res.json({
     message: `Status will be sent to the user through registered Email`,

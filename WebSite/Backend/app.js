@@ -34,13 +34,13 @@ app.post("/", async (req, res) => {
   // * 1. Check if user id is valid
   if (result.rowCount == 0) {
     console.log(`![SERVER] : Invalid UID ${uid} was passed at ${new Date()}`);
-    res.json({ message: "Invalid user id" });
+    return res.json({ message: "Invalid user id" });
   }
 
   console.log(`Received UID: ${uid} at ${new Date()}`);
 
   // * 2. Verify using python face recognition
-  faceRecognition(uid);
+  faceRecognition(uid, result.rows[0].name);
 
   res.json({
     message: `Status will be sent to the user through registered Email`,

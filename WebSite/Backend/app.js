@@ -1,31 +1,59 @@
 import express from "express";
 import ip from "ip";
 import faceRecognition from "./face-config/pythonProcess.js";
+import { connectDB, db } from "./config/database.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
 const ipAddress = ip.address();
 
+connectDB();
+
 //*  Middleware to parse JSON payloads
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// * To check if system is up
+app.get("/", (req, res) => {
+  res.send("<h1>Attendance system is up and running 😎</h1>");
+});
+
+// * To get the request to update attendance
 app.post("/", async (req, res) => {
-  const { uid } = req.body; // * Extract uid from the JSON payload
-  
+  // * Extract uid from the JSON payload
+  const { uid } = req.body;
+
+  // ! If no uid given
   if (!uid) {
     console.log(`Invalid request received at ${new Date()}`);
     return res.status(400).json({ error: "UID is required" });
   }
 
+  db.query(
+    `SELECT * FROM students 
+    WHERE uid = $1
+  `,
+    [uid],
+    (err, res) => {
+      if (err) {
+        console.error(`![SERVER] : Error occured while checking uid ${err}\n`);
+      } else {
+        console.log(res.rows);
+      }
+    }
+  );
+
   console.log(`Received UID: ${uid} at ${new Date()}`);
 
   // * Code to run the python face recognition program
-  // TODO : Based on result sent the email to the user and update the attendance
   faceRecognition(uid);
 
-  res.json({ message: `Status will be sent to the user through registered Email`});
+  res.json({
+    message: `Status will be sent to the user through registered Email`,
+  });
 });
+
+app.post("/update", async (req, res) => {});
 
 app.listen(port, () => {
   console.log(`Server running on port http://localhost:${port}`);

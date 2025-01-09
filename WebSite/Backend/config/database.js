@@ -8,8 +8,8 @@ const db = new pg.Client({
     port: process.env.DB_PORT
 })
 
-export default function connectDB() {
-    db.connect(err => {
+async function connectDB() {
+    await db.connect((err) => {
         if (err) {
             console.error('Connection error', err.stack);
         } else {
@@ -18,6 +18,7 @@ export default function connectDB() {
     });
 }
 
+export { connectDB, db };
 
 // ! Sample code below to query 
 // db.query("SELECT * FROM students", (err, res) => {

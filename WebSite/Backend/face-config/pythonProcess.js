@@ -3,7 +3,7 @@ import { dirname } from "path";
 import { spawn } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(dirname(__filename));
+const __dirname = dirname(__filename);
 
 export default function faceRecognition(uid) {
 

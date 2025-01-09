@@ -1,6 +1,6 @@
 import express from "express";
 import ip from "ip";
-import faceRecognition from "./config/pythonProcess.js";
+import faceRecognition from "./face-config/pythonProcess.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -18,8 +18,7 @@ app.post("/", (req, res) => {
     return res.status(400).json({ error: "UID is required" });
   }
 
-  console.log(`Received UID: ${uid}`);
-  console.log(`Yoi, someone just pinged at ${new Date()}`);
+  console.log(`Received UID: ${uid} at ${new Date()}`);
 
   // ! Code to run the python face recognition program
   faceRecognition(uid);
@@ -29,5 +28,5 @@ app.post("/", (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server running on port http://localhost:${port}`);
-  console.log(`Network access at : http://${ipAddress}:${port}`);
+  console.log(`Network access at : http://${ipAddress}:${port}\n\n`);
 });

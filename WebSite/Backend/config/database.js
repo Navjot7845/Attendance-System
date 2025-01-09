@@ -1,5 +1,6 @@
 import pg from "pg";
 
+// * Client object created to connect to the database
 const db = new pg.Client({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -8,6 +9,7 @@ const db = new pg.Client({
     port: process.env.DB_PORT
 })
 
+// * Returning connectDB function to connect to `postgres database`
 async function connectDB() {
     await db.connect((err) => {
         if (err) {

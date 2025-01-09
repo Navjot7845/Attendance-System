@@ -29,23 +29,17 @@ app.post("/", async (req, res) => {
     return res.status(400).json({ error: "UID is required" });
   }
 
-  db.query(
-    `SELECT * FROM students 
-    WHERE uid = $1
-  `,
-    [uid],
-    (err, res) => {
-      if (err) {
-        console.error(`![SERVER] : Error occured while checking uid ${err}\n`);
-      } else {
-        console.log(res.rows);
-      }
-    }
-  );
+  const result = await db.query(`SELECT * FROM students WHERE uid = $1`,[uid]);
+
+  // * 1. Check if user id is valid
+  if (result.rowCount == 0) {
+    console.log(`![SERVER] : Invalid UID ${uid} was passed at ${new Date()}`);
+    res.json({ message: "Invalid user id" });
+  }
 
   console.log(`Received UID: ${uid} at ${new Date()}`);
 
-  // * Code to run the python face recognition program
+  // * 2. Verify using python face recognition
   faceRecognition(uid);
 
   res.json({

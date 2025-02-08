@@ -29,7 +29,6 @@ export default function faceRecognition(uid, VerifiedName, email) {
 
     const name = data.toString().trim();
 
-    // TODO 2 Check if verified
     if (name === VerifiedName) {
       const time = new Date();
 

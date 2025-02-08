@@ -14,9 +14,11 @@ export default function faceRecognition(uid, VerifiedName, email) {
 
   let timeoutHandle;
 
-  // TODO 1 Check if no face visible
+  // * 1. Check if no face visible
+
   // ! Set a timeout to kill the process after 7 seconds
   const timeout = 7000; 
+
   timeoutHandle = setTimeout(() => {
     console.log(`~[SERVER]: Process timed out after 7 seconds for user '${VerifiedName}' uid '${uid}'`);
     pythonProcess.kill("SIGTERM"); // * Terminate the process
@@ -29,6 +31,7 @@ export default function faceRecognition(uid, VerifiedName, email) {
 
     const name = data.toString().trim();
 
+    // * 2. Check if verified
     if (name === VerifiedName) {
       const time = new Date();
 
@@ -36,14 +39,17 @@ export default function faceRecognition(uid, VerifiedName, email) {
         await db.query(`CALL add_attendance($1)`, [uid]);
         
         mailSender(email, "You got verified", `Attendance updated succesfully at ${time}`);
+        
         console.log(`~[SERVER]: ${name} with uid '${uid}' just got 'verified' at ${time}\n`);
       } catch (error) {
         console.error(`~[SERVER]: Error logging attendance: ${error.message}`);
       }
 
     } else {
-      // TODO 3 Check if not verified
+      // * 3. Check if not verified
+
       mailSender(email, "Proxy detected", `Proxy at ${time} by ${name} for ${VerifiedName}`);
+
       console.log(`![SERVER] : Proxy done by '${name}' for '${VerifiedName}' with uid '${uid}'`);
     }
   });

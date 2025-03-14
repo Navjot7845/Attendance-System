@@ -1,14 +1,15 @@
 import express from "express";
 import ip from "ip";
-import faceRecognition from "./face-config/pythonProcess.js";
-import { connectDB, db } from "./config/database.js";
-import mailSender from "./config/email.js";
+import { ConnectToPostgres } from "./config/database.js";
+import attendanceRoutes from "./routes/attendance.js";
+import connectToMongoDB from "./db/database.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
 const ipAddress = ip.address();
 
-connectDB();
+ConnectToPostgres();
+connectToMongoDB();
 
 //*  Middleware to parse JSON payloads
 app.use(express.json());
@@ -19,34 +20,7 @@ app.get("/", (req, res) => {
   res.send("<h1>Attendance system is up and running 😎</h1>");
 });
 
-// * To get the request to update attendance
-app.post("/", async (req, res) => {
-  // * Extract uid from the JSON payload
-  const { uid } = req.body;
-
-  // ! If no uid given
-  if (!uid) {
-    console.log(`Invalid request received at ${new Date()}`);
-    return res.status(400).json({ error: "UID is required" });
-  }
-
-  const result = await db.query(`SELECT * FROM students WHERE uid = $1`,[uid]);
-
-  // * 1. Check if user id is valid
-  if (result.rowCount == 0) {
-    console.log(`![SERVER] : Invalid UID ${uid} was passed at ${new Date()}`);
-    return res.json({ message: "Invalid user id" });
-  }
-
-  console.log(`Received UID: ${uid} at ${new Date()}`);
-
-  // * 2. Verify using python face recognition
-  faceRecognition(uid, result.rows[0].name, result.rows[0].email);
-
-  res.json({
-    message: `Status will be sent to the user through registered Email`,
-  });
-});
+app.use('/', attendanceRoutes);
 
 app.post("/update", async (req, res) => {});
 

@@ -10,7 +10,7 @@ const db = new pg.Client({
 })
 
 // * Returning connectDB function to connect to `postgres database`
-async function connectDB() {
+async function ConnectToPostgres() {
     await db.connect((err) => {
         if (err) {
             console.error('Connection error', err.stack);
@@ -20,7 +20,7 @@ async function connectDB() {
     });
 }
 
-export { connectDB, db };
+export { ConnectToPostgres, db };
 
 // ! Sample code below to query 
 // db.query("SELECT * FROM students", (err, res) => {

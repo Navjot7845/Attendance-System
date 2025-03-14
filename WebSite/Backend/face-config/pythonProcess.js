@@ -2,7 +2,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { spawn } from "child_process";
 import { db } from "../config/database.js";
-import mailSender from "../config/email.js";
+import mailSender from "../utils/mailSender.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 export default function faceRecognition(uid, VerifiedName, email) {
 
   // TODO CHANGE `usr/bin/python3` by your recognized python set in your PC
-  
+
   const pythonProcess = spawn("/usr/bin/python3", [
     `${__dirname}/face-recognition/main.py`,
   ]);
@@ -50,6 +50,7 @@ export default function faceRecognition(uid, VerifiedName, email) {
 
     } else {
       // * 3. Check if not verified
+      const time = new Date();
 
       mailSender(email, "Proxy detected", `Proxy at ${time} by ${name} for ${VerifiedName}`);
 

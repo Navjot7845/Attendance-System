@@ -1,10 +1,17 @@
 {
   "type": "module",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.10",
     "express": "^4.21.2",
     "ip": "^2.0.1",
-    "nodemailer": "^6.9.16",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.12.1",
+    "nodemailer": "^6.10.0",
     "npm": "^11.0.0",
-    "pg": "^8.13.1"
+    "otp-generator": "^4.0.1",
+    "pg": "^8.13.1",
+    "validator": "^13.12.0"
   }
 }

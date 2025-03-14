@@ -10,7 +10,7 @@ sfr.load_encoding_images(script_directory + "/images")
 
 # load camera
 cap = cv2.VideoCapture(0)
-# cap = cv2.VideoCapture("http://192.168.1.104:81/stream")
+# cap = cv2.VideoCapture("http://192.168.1.30:81/stream")
 
 while True:
     ret, frame = cap.read()

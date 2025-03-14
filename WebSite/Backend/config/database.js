@@ -1,6 +1,7 @@
 import pg from "pg";
 import otpGenerator from "otp-generator";
 
+
 // * Client object created to connect to the database
 const db = new pg.Client({
   user: process.env.DB_USER,
@@ -14,9 +15,8 @@ const db = new pg.Client({
 async function ConnectToPostgres() {
   try {
     await db.connect();
-    
-    console.log("Connected to the PG database");
 
+    console.log("Connected to the PG database");
   } catch (err) {
     console.error("Connection error", err.stack);
   }
@@ -34,7 +34,7 @@ async function generateOTP(email) {
     [email, otp]
   );
 
-  console.log(`Otp saved to the Postgres database ${result.rows[0].otp}`)
+  console.log(`Otp saved to the Postgres database ${result.rows[0].otp}`);
 
   return result.rows.length > 0 ? result.rows[0].otp : null;
 }
@@ -63,11 +63,13 @@ async function deleteOTP(email) {
 }
 
 // * Create a new user
-async function createUser(uid, roll_no, name, email, batch, password) {
+async function createUser(uid, roll_no, name, email, batch, password, token) {
+
   const result = await db.query(
-    "INSERT INTO users (uid, roll_no, name, email, batch, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-    [uid, roll_no, name, email, batch, password]
+    "INSERT INTO users (uid, roll_no, name, email, batch, password, token) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    [uid, roll_no, name, email, batch, password, token]
   );
+
   return result.rows[0];
 }
 

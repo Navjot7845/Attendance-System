@@ -7,6 +7,7 @@ import sendResetLink from "../controller/linkController.js";
 import ResetCode from "../models/passwordLink.js";
 import bcrypt from "bcryptjs";
 import { db, findOTP, deleteOTP, createUser} from "../config/database.js";
+import jwt from "jsonwebtoken";
 
 const userRoutes = Router();
 
@@ -16,26 +17,29 @@ const userRoutes = Router();
 */
 userRoutes.post('/signup', async (req, res) => {
     try {
-        const { uid, roll_no, name, email, batch, password } = req.body;
+        // * 1. Get the fields from the request.
+        let { uid, roll_no, name, email, batch, password, otp } = req.body;
 
-        const otp = await findOTP(email);
-
-        if (!req.body.otp) {
+        // * 2. Check if the otp is there in the request or not.
+        if (!otp) {
             return res.status(400).json({ error: "The OTP is required" });
         }
 
-        if ( (req.body.otp).length == 0 || req.body.otp != otp) {
+        // * 3. Here we check if the latest OTP is equal to given.
+        const storedOTP = await findOTP(email);
+        if (!storedOTP || otp !== storedOTP) {
             return res.status(400).json({ error: "The OTP is not valid" });
         }
 
-        await deleteOTP(req.body.email);
+        // * 4. After verification of OTP we delete it.
+        await deleteOTP(email);
 
-        password = await bcrypt.hash(password, 8)
-
-        const user = await createUser(uid, roll_no, name, email, batch, password);
-
+        // * 5. Password is Hashed and a token is issued for the user
+        password = await bcrypt.hash(password, 8);
         const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET);
 
+        // * 6. user is created and token is saved
+        const user = await createUser(uid, roll_no, name, email, batch, password, token);
         console.log(`User created: ${user}`);
 
         res.status(201).json({ user, token });

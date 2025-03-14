@@ -6,7 +6,7 @@ import OTP from "../models/otp.js";
 import sendResetLink from "../controller/linkController.js";
 import ResetCode from "../models/passwordLink.js";
 import bcrypt from "bcryptjs";
-import { db, findOTP, deleteOTP, createUser} from "../config/database.js";
+import { db, findOTP, deleteOTP, createUser, findUserByCredentials} from "../config/database.js";
 import jwt from "jsonwebtoken";
 
 const userRoutes = Router();
@@ -72,21 +72,26 @@ userRoutes.post('/send-otp', sendOTP);
 // * This route takes [email, password, otp]
 userRoutes.post('/login', async (req, res) => {
     try {
+        // * 1. Get the fields from the request.
+        let { email, password, otp } = req.body;
 
-        const otp = await OTP.find({ email: req.body.email }).sort({ createdAt: -1 }).limit(1);
-
-        if (!req.body.otp) {
+        // * 2. Check if the otp is there in the request or not.
+        if (!otp) {
             return res.status(400).json({ error: "The OTP is required" });
         }
 
-        if ( (req.body.otp).length == 0 || req.body.otp != otp[0].otp) {
+        // * 3. Here we check if the latest OTP is equal to given.
+        const storedOTP = await findOTP(email);
+        if (!storedOTP || otp !== storedOTP) {
             return res.status(400).json({ error: "The OTP is not valid" });
         }
 
-        await OTP.deleteMany({ email: req.body.email });
+        // * 4. After verification of OTP we delete it.
+        await deleteOTP(email);
 
-        const user = await User.findByCredentials(req.body.email, req.body.password);
-        const token = await user.generateAuthToken();
+        const user = findUserByCredentials(email, password);
+
+        const token = user.token;
 
         res.status(201).json({ user, token });
 

@@ -1,6 +1,7 @@
 import pg from "pg";
 import otpGenerator from "otp-generator";
-
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // * Client object created to connect to the database
 const db = new pg.Client({
@@ -64,7 +65,6 @@ async function deleteOTP(email) {
 
 // * Create a new user
 async function createUser(uid, roll_no, name, email, batch, password, token) {
-
   const result = await db.query(
     "INSERT INTO users (uid, roll_no, name, email, batch, password, token) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
     [uid, roll_no, name, email, batch, password, token]
@@ -75,11 +75,47 @@ async function createUser(uid, roll_no, name, email, batch, password, token) {
 
 // * Find a user by email and password
 async function findUserByCredentials(email, password) {
-  const result = await db.query(
-    "SELECT * FROM users WHERE email = $1 AND password = $2",
-    [email, password]
-  );
-  return result.rows.length > 0 ? result.rows[0] : null;
+    try {
+        // * 1. Find user by email
+        const userResult = await db.query(
+            "SELECT * FROM users WHERE email = $1",
+            [email]
+        );
+
+        // * 2. Check if user exists
+        if (userResult.rows.length === 0) {
+            throw new Error("Invalid credentials");
+        }
+
+        const user = userResult.rows[0];
+        const uid = user.uid;
+
+        // * 3. Verify password match
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw new Error("Invalid credentials");
+        }
+
+        const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET);
+
+        const response = await db.query("UPDATE users SET token = $1 WHERE email = $2 RETURNING *",
+            [token, email]
+        )
+
+        // * 4. Return user without sensitive data
+        return {
+            uid: response.rows[0].uid,
+            name: response.rows[0].name,
+            email: response.rows[0].email,
+            batch: response.rows[0].batch,
+            type: response.rows[0].type,
+            token: response.rows[0].token
+        };
+
+    } catch (error) {
+        console.error("Authentication error:", error);
+        throw new Error("Invalid credentials");
+    }
 }
 
 // * Find a user by ID

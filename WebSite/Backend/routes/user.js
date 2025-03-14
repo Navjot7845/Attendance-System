@@ -5,6 +5,8 @@ import sendOTP from "../controller/otpController.js";
 import OTP from "../models/otp.js";
 import sendResetLink from "../controller/linkController.js";
 import ResetCode from "../models/passwordLink.js";
+import bcrypt from "bcryptjs";
+import { db, findOTP, deleteOTP, createUser} from "../config/database.js";
 
 const userRoutes = Router();
 
@@ -14,22 +16,25 @@ const userRoutes = Router();
 */
 userRoutes.post('/signup', async (req, res) => {
     try {
+        const { uid, roll_no, name, email, batch, password } = req.body;
 
-        const otp = await OTP.find({ email: req.body.email }).sort({ createdAt: -1 }).limit(1);
+        const otp = await findOTP(email);
 
         if (!req.body.otp) {
             return res.status(400).json({ error: "The OTP is required" });
         }
 
-        if ( (req.body.otp).length == 0 || req.body.otp != otp[0].otp) {
+        if ( (req.body.otp).length == 0 || req.body.otp != otp) {
             return res.status(400).json({ error: "The OTP is not valid" });
         }
 
-        await OTP.deleteMany({ email: req.body.email });
+        await deleteOTP(req.body.email);
 
-        const user = await User.create(req.body);
+        password = await bcrypt.hash(password, 8)
 
-        const token = await user.generateAuthToken();
+        const user = await createUser(uid, roll_no, name, email, batch, password);
+
+        const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET);
 
         console.log(`User created: ${user}`);
 

@@ -1,5 +1,5 @@
-import otpGenerator from "otp-generator";
-import OTP from "../models/otp.js";
+import { generateOTP } from "../config/database.js";
+import mailSender from "../utils/mailSender.js";
 
 // TODO: Modify this for login and signup
 
@@ -9,27 +9,12 @@ async function sendOTP(req, res) {
     // * 1. Take the email
     const { email } = req.body;
 
-    // * 2. Generate the otp
-    let otp = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-      lowerCaseAlphabets: false,
-      specialChars: false,
-    });
+    // * 2. Generate the OTP and save it
+    let otp = await generateOTP(email);
 
-    // * 3. Make sure the OTP is unique
-    // ! This is a very rare case tho haha
-    let result = await OTP.findOne({ otp: otp });
-
-    // * 4. Gerate new OTP till it's unique
-    while (result) {
-      otp = otpGenerator.generate(6, {
-        upperCaseAlphabets: false,
-      });
-      result = await OTP.findOne({ otp: otp });
-    }
-
-    // * 5. Saves the unique OTP to the mongoDB database
-    await OTP.create({ email, otp });
+    await mailSender(email, "Attendance Verification OTP", 
+      `<h1>Please confirm your OTP</h1>
+         <p>Here is your OTP code: ${otp}</p>`)
 
     console.log("Otp sent successfully")
 

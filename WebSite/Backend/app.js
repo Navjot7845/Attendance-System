@@ -3,6 +3,7 @@ import ip from "ip";
 import { ConnectToPostgres } from "./config/database.js";
 import attendanceRoutes from "./routes/attendance.js";
 import connectToMongoDB from "./db/database.js";
+import userRoutes from "./routes/user.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 });
 
 app.use('/', attendanceRoutes);
+app.use('/user', userRoutes);
 
 app.post("/update", async (req, res) => {});
 

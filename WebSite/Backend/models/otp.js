@@ -20,7 +20,7 @@ const otpSchema = new mongoose.Schema({
 // * Function to send the otp mail
 async function sendVerificationEmail(email, otp) {
   try {
-    const mailResponse = await mailSender(email, "Sora AI OTP Verification",
+    const mailResponse = await mailSender(email, "Attendance OTP Verification",
       `<h1>Please confirm your OTP</h1>
          <p>Here is your OTP code: ${otp}</p>`
     );

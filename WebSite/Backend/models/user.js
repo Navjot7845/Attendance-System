@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
+    type: {
+        type: String,
+        default: "student"
+    },
     tokens: [{
         token: {
             type: String,

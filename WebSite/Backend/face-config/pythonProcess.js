@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default function faceRecognition(uid, VerifiedName, email) {
-  const pythonProcess = spawn("python3", [
+  const pythonProcess = spawn("/usr/bin/python3", [
     `${__dirname}/face-recognition/main.py`,
   ]);
 

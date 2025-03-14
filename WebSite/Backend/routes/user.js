@@ -89,7 +89,7 @@ userRoutes.post('/login', async (req, res) => {
         // * 4. After verification of OTP we delete it.
         await deleteOTP(email);
 
-        const user = findUserByCredentials(email, password);
+        const user = await findUserByCredentials(email, password);
 
         const token = user.token;
 

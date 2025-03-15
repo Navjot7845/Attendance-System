@@ -93,6 +93,8 @@ userRoutes.post('/login', async (req, res) => {
 
         const token = user.token;
 
+        delete user.token;
+
         res.status(201).json({ user, token });
 
     } catch (error) {

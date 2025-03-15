@@ -65,13 +65,16 @@ async function deleteOTP(email) {
 
 // * Create a new user
 async function createUser(uid, roll_no, name, email, batch, password, token) {
-  const result = await db.query(
-    "INSERT INTO users (uid, roll_no, name, email, batch, password, token) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-    [uid, roll_no, name, email, batch, password, token]
-  );
-
-  return result.rows[0];
-}
+    const result = await db.query(
+      `INSERT INTO users 
+      (uid, roll_no, name, email, batch, password, token) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING uid, name, email, batch, roll_no, type`, // No parentheses around returning columns
+      [uid, roll_no, name, email, batch, password, token]
+    );
+  
+    return result.rows[0];
+  }
 
 // * Find a user by email and password
 async function findUserByCredentials(email, password) {
@@ -108,6 +111,7 @@ async function findUserByCredentials(email, password) {
             name: response.rows[0].name,
             email: response.rows[0].email,
             batch: response.rows[0].batch,
+            roll_no: response.rows[0].roll_no,
             type: response.rows[0].type,
             token: response.rows[0].token
         };

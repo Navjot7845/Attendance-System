@@ -1,11 +1,13 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
+import { findUserById } from "../config/database.js";
 
 async function auth(req, res, next) {
     try {
         const token = req.header('Authorization').replace('Bearer ', '')
         const decoded = jwt.verify(token, process.env.ENCRYPTION_SECRET)
-        const user = await User.findOne({ _id: decoded._id, 'tokens.token': token })
+
+        const user = await findUserById(decoded.uid);
 
         if (!user) {
             throw new Error()
@@ -14,8 +16,9 @@ async function auth(req, res, next) {
         req.token = token
         req.user = user
         next()
+
     } catch (e) {
-        res.status(401).send({ error: 'Please authenticate.' })
+        res.status(401).send({ error: 'Please login again' })
     } 
 }
 

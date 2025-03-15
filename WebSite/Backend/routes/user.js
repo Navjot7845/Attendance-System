@@ -2,11 +2,10 @@ import { Router } from "express";
 import User from "../models/user.js";
 import auth from "../middleware/auth.js";
 import sendOTP from "../controller/otpController.js";
-import OTP from "../models/otp.js";
 import sendResetLink from "../controller/linkController.js";
 import ResetCode from "../models/passwordLink.js";
 import bcrypt from "bcryptjs";
-import { db, findOTP, deleteOTP, createUser, findUserByCredentials} from "../config/database.js";
+import { db, findOTP, deleteOTP, createUser, findUserByCredentials, findUserById} from "../config/database.js";
 import jwt from "jsonwebtoken";
 
 const userRoutes = Router();
@@ -113,15 +112,9 @@ userRoutes.post('/login', async (req, res) => {
 // TODO This should be .delete request
 userRoutes.patch('/logout', auth, async (req, res) => {
     try {
-        const user = await User.findOneAndUpdate(
-            { email: req.user.email },
-            { $pull: { tokens: { token: req.token } } }, 
-            { new: true }
-        );
+        const uid = req.user.uid;
 
-        if (!user) {
-            return res.status(404).send({ error: "User not found" });
-        }
+        await db.query("UPDATE users SET token = '' WHERE uid = $1;", [uid]);
 
         res.status(200).send({ message: "Logged out successfully" });
 

@@ -126,12 +126,13 @@ userRoutes.patch('/logout', auth, async (req, res) => {
 
 
 // * Get user via id
-userRoutes.get('/:id', async (req, res) => {
+userRoutes.get('/:uid', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await findUserById(req.params.uid);
+
         console.log(`Got user ${user}`);
 
-        if (!user) { 
+        if (user == null) { 
             return res.status(404).json({ error: "User not found" });
         }
 

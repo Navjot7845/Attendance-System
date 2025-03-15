@@ -124,7 +124,7 @@ async function findUserByCredentials(email, password) {
 
 // * Find a user by ID
 async function findUserById(uid) {
-  const result = await db.query("SELECT * FROM users WHERE uid = $1", [uid]);
+  const result = await db.query("SELECT uid, name, email, batch, roll_no, type FROM users WHERE uid = $1", [uid]);
 
   return result.rows.length > 0 ? result.rows[0] : null;
 }

@@ -147,10 +147,10 @@ userRoutes.get('/:uid', async (req, res) => {
 // TODO make a forgot password route which sends email to user.
 userRoutes.post('/forgot-password', async (req, res) => {
     try {
-        const user = await User.findOne({ email: req.body.email });
+        const user = await findUserById(req.params.uid);
         console.log(`Got user ${user}`);
 
-        if (!user) { 
+        if (user == null) { 
             return res.status(404).json({ error: "User not found" });
         }
 

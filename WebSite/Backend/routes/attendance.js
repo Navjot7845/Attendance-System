@@ -15,7 +15,7 @@ attendanceRoutes.post('/', async (req, res) => {
     return res.status(400).json({ error: "UID is required" });
   }
 
-  const result = await db.query(`SELECT * FROM students WHERE uid = $1`, [uid]);
+  const result = await db.query(`SELECT * FROM users WHERE uid = $1 AND type = 'student'`, [uid]);
 
   // * 1. Check if user id is valid
   if (result.rowCount == 0) {

@@ -1,5 +1,5 @@
 import otpGenerator from "otp-generator";
-import ResetCode from "../models/passwordLink.js";
+import { findResetCode, saveResetCode } from "../config/database.js";
 
 // TODO: Modify this for login and signup
 
@@ -14,7 +14,7 @@ async function sendResetLink(email) {
     });
 
     // * 2. Make sure the Link is unique
-    let result = await ResetCode.findOne({ code: linkCode });
+    let result = await findResetCode(linkCode);
 
     // * 3. Gerate new Link till it's unique
     while (result) {
@@ -24,12 +24,12 @@ async function sendResetLink(email) {
             specialChars: false,
         });
 
-      result = await ResetCode.findOne({ code: linkCode });
+      result = await findResetCode(linkCode);
     }
 
     console.log(`The link code is ${linkCode}`);
     // * 4. Saves the unique OTP to the mongoDB database
-    await ResetCode.create({ email, code: linkCode });
+    await saveResetCode(email, linkCode);
 
   } catch (error) {
 

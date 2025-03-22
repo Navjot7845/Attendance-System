@@ -6,7 +6,11 @@ import sendResetLink from "../controller/linkController.js";
 import verifyOtp from "../controller/otpVerificationController.js";
 import ResetCode from "../models/passwordLink.js";
 import bcrypt from "bcryptjs";
-import { db, findOTP, deleteOTP, createUser, findUserByCredentials, findUserById} from "../config/database.js";
+import { db, 
+    createUser, 
+    findUserByCredentials, 
+    findUserById
+} from "../config/database.js";
 import jwt from "jsonwebtoken";
 
 const userRoutes = Router();

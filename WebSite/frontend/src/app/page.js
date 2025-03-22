@@ -1,101 +1,226 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+
+function OtpButton({ sendOtp, loading }) {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <button
+      type="button"
+      onClick={sendOtp}
+      disabled={loading}
+      className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      {loading ? "Sending OTP..." : "Send OTP"}
+    </button>
+  );
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+function LoginButton({ loading }) {
+  return (
+    <button
+      type="submit"
+      disabled={loading}
+      className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      {loading ? "Logging in..." : "Login"}
+    </button>
+  );
+}
+
+function LoginPage() {
+  const router = useRouter();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showOtp, setShowOtp] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  function handleEmailChange(e) {
+    setEmail(e.target.value);
+    if (!validateEmail(e.target.value)) {
+      setError(true);
+      setMessage("Invalid email format");
+    } else {
+      setError(false);
+      setMessage("");
+    }
+  };
+
+  async function sendOtp(e) {
+    e.preventDefault();
+    if (!email) {
+      setMessage("Please enter an email first.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessage("Logged in successfully");
+        setError(false);
+        setShowOtp(true);
+      } else {
+        setError(true);
+        setMessage(data.error || "Failed to send OTP");
+      }
+    } catch (error) {
+      setError(true);
+      console.error("Error:", error);
+      setMessage("An error occurred while sending OTP.");
+    }
+    setLoading(false);
+  }
+
+  async function forgotPassword(e) {
+    e.preventDefault();
+    if (!email) {
+      setMessage("Please enter an email first.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessage("Password Reset email sent");
+        setError(false);
+      } else {
+        setError(true);
+        setMessage(data.error || "Failed to send OTP");
+      }
+    } catch (error) {
+      setError(true);
+      console.error("Error:", error);
+      setMessage("An error occurred while sending OTP.");
+    }
+    setLoading(false);
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password, otp }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessage(data.message);
+        setError(false);
+
+        // * Go to the dashboard on login.
+        router.push("/admin/dashboard");
+      } else {
+        setError(true);
+        setMessage(data.error || "Failed to login");
+      }
+    } catch (error) {
+      setError(true);
+      console.error("Error:", error);
+      setMessage("An error occurred while logging in.");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-800">
+      <div className="w-full max-w-md mx-5 p-8 space-y-6 bg-black text-white rounded-2xl shadow-md">
+        <h1 className="text-2xl font-bold text-center text-white">Login</h1>
+        <form onSubmit={(showOtp) ? handleLogin : sendOtp} className="space-y-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-400">
+              Email:
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={handleEmailChange}
+              placeholder="Enter your email"
+              disabled={showOtp}
+              required
+              className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-400 focus:text-white focus:ring-2 focus:ring-blue-500"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+          {!showOtp ? (
+            <OtpButton sendOtp={sendOtp} loading={loading} />
+          ) : (
+            <>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-400">
+                  Password:
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-400 focus:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-400">
+                  OTP:
+                </label>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter the otp"
+                  required
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none text-gray-400 focus:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <LoginButton loading={loading} />
+            </>
+          )}
+          <Button
+            onClick={forgotPassword}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            Forgot password
+          </Button>
+          {message && (
+            <p
+              className={`text-sm ${error ? "text-red-500" : "text-green-500"}`}
+            >
+              {message}
+            </p>
+          )}
+        </form>
+      </div>
     </div>
   );
 }
+
+export default LoginPage;

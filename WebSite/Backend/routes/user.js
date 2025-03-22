@@ -24,19 +24,25 @@ userRoutes.post('/signup', async (req, res) => {
         // * 1. Get the fields from the request.
         let { uid, roll_no, name, email, batch, password, otp } = req.body;
 
-
         // * 2. Here we check if the latest OTP is equal to given.
         verifyOtp(res, email, otp);
 
         // * 3. Password is Hashed and a token is issued for the user
         password = await bcrypt.hash(password, 8);
-        const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET);
+        const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET, { expiresIn: "3h" });
 
         // * 4. user is created and token is saved
         const user = await createUser(uid, roll_no, name, email, batch, password, token);
         console.log(`User created: ${user}`);
 
-        res.status(201).json({ user, token });
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 3 * 60 * 60 * 1000 // * 3 hours
+        });
+
+        return res.status(201).json({ user, token });
 
     } catch (error) {
         console.error(`Error creating user: ${error.message}`);
@@ -78,7 +84,14 @@ userRoutes.post('/login', async (req, res) => {
 
         delete user.token;
 
-        res.status(201).json({ user, token });
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Lax',
+            maxAge: 3 * 60 * 60 * 1000 // * 3 hours
+        });
+
+        return res.status(201).json({ user, token });
 
     } catch (error) {
         console.error(error);
@@ -100,7 +113,9 @@ userRoutes.patch('/logout', auth, async (req, res) => {
 
         await db.query("UPDATE users SET token = '' WHERE uid = $1;", [uid]);
 
-        res.status(200).send({ message: "Logged out successfully" });
+        res.clearCookie("auth_token");
+
+        return res.status(200).send({ message: "Logged out successfully" });
 
     } catch (error) {
         console.log(error);

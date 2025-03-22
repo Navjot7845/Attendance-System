@@ -4,6 +4,7 @@ import { ConnectToPostgres } from "./config/database.js";
 import attendanceRoutes from "./routes/attendance.js";
 import connectToMongoDB from "./db/database.js";
 import userRoutes from "./routes/user.js";
+import cors from "cors"
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,6 +16,12 @@ connectToMongoDB();
 //*  Middleware to parse JSON payloads
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// * CORS 
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true // ? Allow cookies transmission
+}));
 
 // * To check if system is up
 app.get("/", (req, res) => {

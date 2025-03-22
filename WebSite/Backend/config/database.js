@@ -99,7 +99,7 @@ async function findUserByCredentials(email, password) {
             throw new Error("Invalid credentials");
         }
 
-        const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET);
+        const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET, { expiresIn: "3h" });
 
         const response = await db.query("UPDATE users SET token = $1 WHERE email = $2 RETURNING *",
             [token, email]

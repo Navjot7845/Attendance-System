@@ -3,6 +3,7 @@ import User from "../models/user.js";
 import auth from "../middleware/auth.js";
 import sendOTP from "../controller/otpController.js";
 import sendResetLink from "../controller/linkController.js";
+import verifyOtp from "../controller/otpVerificationController.js";
 import ResetCode from "../models/passwordLink.js";
 import bcrypt from "bcryptjs";
 import { db, findOTP, deleteOTP, createUser, findUserByCredentials, findUserById} from "../config/database.js";
@@ -25,19 +26,13 @@ userRoutes.post('/signup', async (req, res) => {
         }
 
         // * 3. Here we check if the latest OTP is equal to given.
-        const storedOTP = await findOTP(email);
-        if (!storedOTP || otp !== storedOTP) {
-            return res.status(400).json({ error: "The OTP is not valid" });
-        }
+        verifyOtp(res, email, otp);
 
-        // * 4. After verification of OTP we delete it.
-        await deleteOTP(email);
-
-        // * 5. Password is Hashed and a token is issued for the user
+        // * 4. Password is Hashed and a token is issued for the user
         password = await bcrypt.hash(password, 8);
         const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET);
 
-        // * 6. user is created and token is saved
+        // * 5. user is created and token is saved
         const user = await createUser(uid, roll_no, name, email, batch, password, token);
         console.log(`User created: ${user}`);
 
@@ -80,13 +75,7 @@ userRoutes.post('/login', async (req, res) => {
         }
 
         // * 3. Here we check if the latest OTP is equal to given.
-        const storedOTP = await findOTP(email);
-        if (!storedOTP || otp !== storedOTP) {
-            return res.status(400).json({ error: "The OTP is not valid" });
-        }
-
-        // * 4. After verification of OTP we delete it.
-        await deleteOTP(email);
+        verifyOtp(res, email, otp);
 
         const user = await findUserByCredentials(email, password);
 

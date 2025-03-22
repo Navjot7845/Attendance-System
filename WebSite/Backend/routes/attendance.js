@@ -33,7 +33,7 @@ attendanceRoutes.post('/', async (req, res) => {
   });
 });
 
-attendanceRoutes.get('/attendance', async (req, res) => {
+attendanceRoutes.get('/attendance', auth, async (req, res) => {
     const result = await db.query(`SELECT * FROM students`);
 
     console.log(result.rows);

@@ -5,7 +5,23 @@ import auth from "../middleware/auth.js";
 
 const attendanceRoutes = Router();
 
-attendanceRoutes.post('/', async (req, res) => {
+// * This allows to get all attendance
+attendanceRoutes.get("/attendance", auth, async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT users.uid, name, email, batch, time type FROM attendance
+      LEFT JOIN users ON users.uid = attendance.uid;
+      `);
+
+
+    return res.status(200).send(result.rows);
+  } catch (error) {
+    console.error(`Server: errro while retrieving attendance ${error}`);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+attendanceRoutes.post("/", async (req, res) => {
   // * Extract uid from the JSON payload
   const { uid } = req.body;
 
@@ -15,7 +31,10 @@ attendanceRoutes.post('/', async (req, res) => {
     return res.status(400).json({ error: "UID is required" });
   }
 
-  const result = await db.query(`SELECT * FROM users WHERE uid = $1 AND type = 'student'`, [uid]);
+  const result = await db.query(
+    `SELECT * FROM users WHERE uid = $1 AND type = 'student'`,
+    [uid]
+  );
 
   // * 1. Check if user id is valid
   if (result.rowCount == 0) {
@@ -32,13 +51,5 @@ attendanceRoutes.post('/', async (req, res) => {
     message: `Status will be sent to the user through registered Email`,
   });
 });
-
-attendanceRoutes.get('/attendance', auth, async (req, res) => {
-    const result = await db.query(`SELECT * FROM students`);
-
-    console.log(result.rows);
-
-     return res.send(result.rows);
-})
 
 export default attendanceRoutes;

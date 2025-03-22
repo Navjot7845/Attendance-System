@@ -20,19 +20,15 @@ userRoutes.post('/signup', async (req, res) => {
         // * 1. Get the fields from the request.
         let { uid, roll_no, name, email, batch, password, otp } = req.body;
 
-        // * 2. Check if the otp is there in the request or not.
-        if (!otp) {
-            return res.status(400).json({ error: "The OTP is required" });
-        }
 
-        // * 3. Here we check if the latest OTP is equal to given.
+        // * 2. Here we check if the latest OTP is equal to given.
         verifyOtp(res, email, otp);
 
-        // * 4. Password is Hashed and a token is issued for the user
+        // * 3. Password is Hashed and a token is issued for the user
         password = await bcrypt.hash(password, 8);
         const token = jwt.sign({ uid }, process.env.ENCRYPTION_SECRET);
 
-        // * 5. user is created and token is saved
+        // * 4. user is created and token is saved
         const user = await createUser(uid, roll_no, name, email, batch, password, token);
         console.log(`User created: ${user}`);
 
@@ -69,12 +65,7 @@ userRoutes.post('/login', async (req, res) => {
         // * 1. Get the fields from the request.
         let { email, password, otp } = req.body;
 
-        // * 2. Check if the otp is there in the request or not.
-        if (!otp) {
-            return res.status(400).json({ error: "The OTP is required" });
-        }
-
-        // * 3. Here we check if the latest OTP is equal to given.
+        // * 2. Here we check if the latest OTP is equal to given.
         verifyOtp(res, email, otp);
 
         const user = await findUserByCredentials(email, password);

@@ -1,13 +1,13 @@
 import { Router } from "express";
 import faceRecognition from "../face-config/pythonProcess.js";
 import { db } from "../config/database.js";
-import auth from "../middleware/auth.js";
 
 const attendanceRoutes = Router();
 
 // * This allows to get all attendance
-attendanceRoutes.get("/attendance", auth, async (req, res) => {
+attendanceRoutes.get("/attendance", async (req, res) => {
   try {
+    console.log(req.uid);
     const result = await db.query(`
       SELECT users.uid, name, email, batch, time type FROM attendance
       LEFT JOIN users ON users.uid = attendance.uid;

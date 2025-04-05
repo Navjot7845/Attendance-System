@@ -15,6 +15,8 @@ export default function faceRecognition(uid, VerifiedName, email) {
     `${__dirname}/face-recognition/main.py`,
   ]);
 
+  console.log(`${__dirname}/face-recognition/main.py`)
+
   let timeoutHandle;
 
   // * 1. Check if no face visible

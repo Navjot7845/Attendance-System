@@ -8,9 +8,9 @@
 #define RXD2 14  // UOR pin
 #define TXD2 12  // UOT pin
 
-const char* ssid = "WIFI NAME";       // Replace with your Wi-Fi SSID
-const char* password = "WIFI PASSWORD";              // Replace with your Wi-Fi Password
-const char* serverUrl = "http://192.168.1.105:3000"; // Replace with your server URL
+const char* ssid = "Airtel_9814005912_4G";       // Replace with your Wi-Fi SSID
+const char* password = "2206@Ravi";              // Replace with your Wi-Fi Password
+const char* serverUrl = "http://192.168.1.44:3000"; // Replace with your server URL
 
 void startCameraServer();
 void setupLedFlash(int pin);
